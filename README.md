@@ -47,7 +47,7 @@ insoft-admin-app/
 
 ### 2.1 Database (already applied to project `zllvrsgkywsembcxfpnd`)
 
-`supabase/migrations/001_admin_schema.sql`, `002_vendor_poc.sql` and `003_roles.sql` have **already been run** on your project. For a new project, open **SQL Editor → New query** and run each file once, in order.
+`supabase/migrations/001_admin_schema.sql` through `005_vendor_sheet_export.sql` have **already been run** on your project. For a new project, open **SQL Editor → New query** and run each file once, in order.
 
 What it did to the earlier attempt's tables (`vendors`, `clients`, `money_records`):
 
@@ -205,6 +205,25 @@ Security:
 
 - `supabase/optional/seed_test_data.sql` loads dummy data: 8 vendors with categories and brands, 6 clients, and 7 payables plus 7 receivables with payments. Re-running it resets that data.
 - `supabase/optional/remove_test_data.sql` deletes only that data. Test vendor phone numbers are `+91 98100 100xx` and test client numbers are `+91 98200 200xx`.
+
+### Vendor list in Google Sheets
+
+The vendor directory can be copied into a Google Sheet that refreshes every hour. The copy has company, owner mobile, address, contact person, contact number, categories and brands. Clients, payables, balances and payments are **not** included.
+
+How it works:
+- The script in `google-sheets/VendorSync.gs` runs inside your Google account (Apps Script). It calls the database function `export_vendors(p_key)` (migration 005).
+- That function only returns data for the correct export key. It is read-only and returns nothing else.
+- The key is stored only as a SHA-256 hash in `private.export_keys`, a schema the API can't reach. The plain key is in the git-ignored `.env.db` as `VENDOR_SHEET_EXPORT_KEY`.
+
+Setup:
+1. Create a Google Sheet. Choose **Extensions → Apps Script**, replace the code with `google-sheets/VendorSync.gs`, and save.
+2. Under **Project Settings → Script properties**, add `SUPABASE_URL`, `SUPABASE_ANON_KEY` and `VENDOR_EXPORT_KEY`.
+3. Select `installHourlySync` and click **Run**. Allow access when Google asks. This syncs immediately and then every hour.
+4. Reload the sheet. The **Insoft → Sync vendors now** menu runs a sync on demand.
+
+The sheet is a copy. Add and edit vendors in the admin app; manual edits in the sheet are overwritten by the next sync.
+
+To rotate the key (for example, if it was shared by mistake), run the SQL in the header of `005_vendor_sheet_export.sql` with a new random key, then update the script property.
 
 ---
 
