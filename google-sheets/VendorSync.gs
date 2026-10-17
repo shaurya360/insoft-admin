@@ -1,4 +1,7 @@
 /**
+ * @OnlyCurrentDoc
+ * (Limits the script's access to this one spreadsheet, not all of your Google Sheets.)
+ *
  * INSOFT — Vendor list → Google Sheets (read-only copy)
  *
  * Copies the vendor directory from the INSOFT admin app into a "Vendors" tab:
