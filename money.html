@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" class="auth-pending">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Money Manager — INSOFT Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="icon" href="logo.jpg">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/app.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="js/config.js"></script>
+  <script type="module" src="js/pages/money.js"></script>
+</head>
+<body>
+  <main id="page">
+    <div class="page-head">
+      <div>
+        <h1>Money Manager</h1>
+        <p>What you owe vendors and what clients owe you.</p>
+      </div>
+      <div class="page-actions">
+        <button type="button" class="btn btn-lg" data-action="add-vendor"></button>
+        <button type="button" class="btn btn-lg" data-action="add-client"></button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="card stat accent-out">
+        <div class="stat-label">Outstanding payable to vendors</div>
+        <div class="stat-value" data-sum="pay-out">—</div>
+        <div class="stat-note">Remaining balance still to pay</div>
+      </div>
+      <div class="card stat">
+        <div class="stat-label">Paid to vendors</div>
+        <div class="stat-value" data-sum="pay-paid">—</div>
+        <div class="stat-note">Total of all payments made</div>
+      </div>
+      <div class="card stat accent-in">
+        <div class="stat-label">Outstanding receivable from clients</div>
+        <div class="stat-value" data-sum="rec-out">—</div>
+        <div class="stat-note">Remaining balance still to collect</div>
+      </div>
+      <div class="card stat">
+        <div class="stat-label">Received from clients</div>
+        <div class="stat-value" data-sum="rec-paid">—</div>
+        <div class="stat-note">Total of all receipts collected</div>
+      </div>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab" role="tab" data-tab="payables">Vendor Payables <span class="count" data-count="payables">0</span></button>
+      <button type="button" class="tab" role="tab" data-tab="receivables">Client Receivables <span class="count" data-count="receivables">0</span></button>
+      <button type="button" class="tab" role="tab" data-tab="clients">Clients <span class="count" data-count="clients">0</span></button>
+    </div>
+
+    <section id="panel" role="tabpanel"></section>
+  </main>
+</body>
+</html>

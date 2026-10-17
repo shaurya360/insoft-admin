@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" class="auth-pending">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Dashboard — INSOFT Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="icon" href="logo.jpg">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/app.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="js/config.js"></script>
+  <script type="module" src="js/pages/dashboard.js"></script>
+</head>
+<body>
+  <main id="page">
+    <div class="page-head">
+      <div>
+        <h1>Dashboard</h1>
+        <p id="greeting">Welcome back.</p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      <a class="card feature" href="quotation.html">
+        <div class="feature-icon" data-icon="file"></div>
+        <h2>Quotation Generator</h2>
+        <p>Create quotations and purchase orders, print or download as PDF.</p>
+        <span class="go">Open →</span>
+      </a>
+      <a class="card feature" href="money.html">
+        <div class="feature-icon" data-icon="wallet"></div>
+        <h2>Money Manager</h2>
+        <p>Track what you owe vendors and what clients owe you, with payment history.</p>
+        <span class="go">Open →</span>
+      </a>
+      <a class="card feature" href="vendors.html">
+        <div class="feature-icon" data-icon="store"></div>
+        <h2>Vendor Directory</h2>
+        <p>Find vendors by product category and brand, with contact details.</p>
+        <span class="go">Open →</span>
+      </a>
+    </div>
+
+    <div class="stats" id="stats" aria-live="polite">
+      <div class="card stat"><div class="stat-label">Vendors</div><div class="stat-value" data-stat="vendors">—</div><div class="stat-note">In the shared directory</div></div>
+      <div class="card stat"><div class="stat-label">Clients</div><div class="stat-value" data-stat="clients">—</div><div class="stat-note">In the shared directory</div></div>
+      <div class="card stat accent-out"><div class="stat-label">Outstanding payable</div><div class="stat-value" data-stat="payable_outstanding">—</div><div class="stat-note">Remaining balance owed to vendors</div></div>
+      <div class="card stat accent-in"><div class="stat-label">Outstanding receivable</div><div class="stat-value" data-stat="receivable_outstanding">—</div><div class="stat-note">Remaining balance owed by clients</div></div>
+    </div>
+
+    <div class="two-col">
+      <section class="card">
+        <div class="card-pad" style="padding-bottom:8px"><h2 class="section-title" style="margin:0">Upcoming payments to vendors</h2></div>
+        <div id="due-payables"></div>
+      </section>
+      <section class="card">
+        <div class="card-pad" style="padding-bottom:8px"><h2 class="section-title" style="margin:0">Upcoming receipts from clients</h2></div>
+        <div id="due-receivables"></div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

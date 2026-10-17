@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" class="auth-pending">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Sign in — INSOFT Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="icon" href="logo.jpg">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/app.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="js/config.js"></script>
+  <script type="module" src="js/pages/login.js"></script>
+</head>
+<body>
+  <main class="login-page">
+    <div class="card login-card">
+      <div class="brand">
+        <img src="logo.jpg" alt="" onerror="this.style.display='none'">
+      </div>
+      <h1>INSOFT TECHNOLOGY</h1>
+      <p class="sub">Sign in to the admin dashboard</p>
+      <form id="login-form" novalidate>
+        <div class="field">
+          <label for="email">Email</label>
+          <input class="input" id="email" name="email" type="email" autocomplete="username" required autofocus>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="pw-wrap">
+            <input class="input" id="password" name="password" type="password" autocomplete="current-password" required>
+            <button type="button" class="pw-toggle" id="pw-toggle" aria-label="Show password">Show</button>
+          </div>
+        </div>
+        <div class="alert alert-error" id="login-error" role="alert" hidden></div>
+        <button type="submit" class="btn btn-primary btn-lg btn-block" id="login-btn">Sign in</button>
+      </form>
+    </div>
+  </main>
+</body>
+</html>

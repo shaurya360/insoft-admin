@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" class="auth-pending">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Vendor Directory — INSOFT Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="icon" href="logo.jpg">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/app.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="js/config.js"></script>
+  <script type="module" src="js/pages/vendors.js"></script>
+</head>
+<body>
+  <main id="page">
+    <div class="page-head">
+      <div>
+        <h1>Vendor Directory</h1>
+        <p>Find which vendors supply a product category and brand.</p>
+      </div>
+      <div class="page-actions">
+        <button type="button" class="btn btn-primary btn-lg" id="add-vendor"></button>
+      </div>
+    </div>
+
+    <div class="card card-pad" style="margin-bottom:16px">
+      <div class="toolbar" style="margin:0">
+        <div class="field grow">
+          <label for="q">Search</label>
+          <div class="search" id="search-wrap"><input class="input" id="q" type="search" placeholder="Vendor name, category, brand or phone" autocomplete="off"></div>
+        </div>
+        <div class="field"><label for="category">Product category</label><input id="category" type="text"></div>
+        <div class="field"><label for="brand">Brand</label><input id="brand" type="text"></div>
+        <button type="button" class="btn" id="clear">Clear filters</button>
+      </div>
+    </div>
+
+    <p class="result-count" id="count" aria-live="polite"></p>
+    <div id="results"></div>
+  </main>
+</body>
+</html>
