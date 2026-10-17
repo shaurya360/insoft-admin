@@ -11,6 +11,7 @@ const NAV = [
     { href: 'money.html#clients', key: 'clients', label: 'Clients' },
   ] },
   { href: 'vendors.html', key: 'vendors', label: 'Vendor Directory', icon: 'store' },
+  { href: 'enquiries.html', key: 'enquiries', label: 'Website Enquiries', icon: 'inbox' },
 ];
 
 /**

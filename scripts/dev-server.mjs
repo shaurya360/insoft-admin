@@ -12,7 +12,7 @@ const TYPES = {
   '.css': 'text/css; charset=utf-8', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png',
   '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.json': 'application/json',
 };
-const PUBLIC = /^\/(index|login|dashboard|quotation|money|vendors)\.html$|^\/logo\.jpg$|^\/(css|js)\//;
+const PUBLIC = /^\/(index|login|dashboard|quotation|money|vendors|enquiries)\.html$|^\/logo\.jpg$|^\/(css|js)\//;
 
 http.createServer((req, res) => {
   let p = decodeURIComponent(new URL(req.url, 'http://x').pathname);

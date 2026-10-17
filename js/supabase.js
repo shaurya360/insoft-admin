@@ -24,7 +24,7 @@ export const sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_AN
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storageKey: 'insoft-admin-auth' },
 });
 
-const PAGES = /^(dashboard|quotation|money|vendors)\.html(\?[^#]*)?(#.*)?$/;
+const PAGES = /^(dashboard|quotation|money|vendors|enquiries)\.html(\?[^#]*)?(#.*)?$/;
 
 /** Only allow redirects to our own pages (no open redirects). */
 export function safeNext(next) {
