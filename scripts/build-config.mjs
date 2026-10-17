@@ -51,7 +51,7 @@ window.APP_CONFIG = Object.freeze(${JSON.stringify({ SUPABASE_URL: url, SUPABASE
 const outDir = process.argv[2] ? path.resolve(root, process.argv[2]) : null;
 if (outDir) {
   fs.rmSync(outDir, { recursive: true, force: true });
-  const include = ['index.html', 'login.html', 'dashboard.html', 'quotation.html', 'money.html', 'vendors.html', 'enquiries.html', 'logo.jpg', 'css', 'js'];
+  const include = ['index.html', 'login.html', 'dashboard.html', 'quotation.html', 'money.html', 'vendors.html', 'enquiries.html', 'offline.html', 'logo.jpg', 'manifest.webmanifest', 'sw.js', 'icons', 'css', 'js'];
   for (const item of include) fs.cpSync(path.join(root, item), path.join(outDir, item), { recursive: true });
   fs.writeFileSync(path.join(outDir, 'js', 'config.js'), config);
   console.log(`✓ Site built to ${path.relative(root, outDir)}/`);

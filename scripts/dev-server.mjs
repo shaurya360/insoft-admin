@@ -11,8 +11,9 @@ const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png',
   '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.json': 'application/json',
+  '.webmanifest': 'application/manifest+json',
 };
-const PUBLIC = /^\/(index|login|dashboard|quotation|money|vendors|enquiries)\.html$|^\/logo\.jpg$|^\/(css|js)\//;
+const PUBLIC = /^\/(index|login|dashboard|quotation|money|vendors|enquiries|offline)\.html$|^\/(logo\.jpg|manifest\.webmanifest|sw\.js)$|^\/(css|js|icons)\//;
 
 http.createServer((req, res) => {
   let p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
