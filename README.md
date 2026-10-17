@@ -208,7 +208,7 @@ Security:
 
 ### Vendor list in Google Sheets
 
-The vendor directory can be copied into a Google Sheet that refreshes every hour. The copy has company, owner mobile, address, contact person, contact number, categories and brands. Clients, payables, balances and payments are **not** included.
+The vendor directory can be copied into a Google Sheet whenever you choose **Insoft → Sync vendors now**. The copy has company, owner mobile, address, contact person, contact number, categories and brands. Clients, payables, balances and payments are **not** included.
 
 How it works:
 - The script in `google-sheets/VendorSync.gs` runs inside your Google account (Apps Script). It calls the database function `export_vendors(p_key)` (migration 005).
@@ -218,10 +218,14 @@ How it works:
 Setup:
 1. Create a Google Sheet. Choose **Extensions → Apps Script**, replace the code with `google-sheets/VendorSync.gs`, and save.
 2. Under **Project Settings → Script properties**, add `SUPABASE_URL`, `SUPABASE_ANON_KEY` and `VENDOR_EXPORT_KEY`.
-3. Select `installHourlySync` and click **Run**. Allow access when Google asks. This syncs immediately and then every hour.
-4. Reload the sheet. The **Insoft → Sync vendors now** menu runs a sync on demand.
+3. Select `syncVendors` and click **Run**. Allow access when Google asks.
+4. Reload the sheet. Use **Insoft → Sync vendors now** after adding or changing vendors.
 
 The sheet is a copy. Add and edit vendors in the admin app; manual edits in the sheet are overwritten by the next sync.
+
+Safety:
+- Each sync first copies the current list to a **Vendors (previous sync)** tab.
+- If the app returns an empty or shorter list, the sync stops and asks before replacing anything. An accidental deletion in the app can't silently wipe the sheet.
 
 To rotate the key (for example, if it was shared by mistake), run the SQL in the header of `005_vendor_sheet_export.sql` with a new random key, then update the script property.
 

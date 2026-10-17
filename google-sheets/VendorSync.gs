@@ -8,8 +8,11 @@
  * company, owner mobile, address, contact person, contact number, categories, brands.
  * No clients, payables, balances or any other data are included.
  *
- * The sheet is a copy: edit vendors in the admin app. Every sync replaces the
- * tab's contents with the current list.
+ * The sheet is a copy: edit vendors in the admin app. Sync runs only when you
+ * choose Insoft → Sync vendors now. Before replacing the list, the current tab is
+ * copied to "Vendors (previous sync)", and the sync stops to ask you if the new
+ * list is empty or much shorter — so an accidental deletion in the app can't
+ * silently wipe this copy.
  *
  * Setup (once):
  *   1. Extensions → Apps Script, paste this file, save.
@@ -17,18 +20,19 @@
  *        SUPABASE_URL       https://<project-ref>.supabase.co
  *        SUPABASE_ANON_KEY  <anon / publishable key>
  *        VENDOR_EXPORT_KEY  <vendor export key>
- *   3. Run installHourlySync once and allow access when Google asks.
+ *   3. Run syncVendors once and allow access when Google asks.
  *   Reload the spreadsheet to see the "Insoft" menu (Sync vendors now).
+ *   If you set up the earlier hourly version, run removeHourlySync once.
  */
 
 const SHEET_NAME = 'Vendors';
+const BACKUP_NAME = 'Vendors (previous sync)';
 const HEADER = ['Company', 'Owner mobile', 'Address', 'Contact person', 'Contact number', 'Categories', 'Brands', 'Last updated in app'];
 
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('Insoft')
     .addItem('Sync vendors now', 'syncVendors')
-    .addItem('Turn on hourly sync', 'installHourlySync')
     .addToUi();
 }
 
@@ -55,6 +59,34 @@ function syncVendors() {
 
   const ss = SpreadsheetApp.getActive();
   const sheet = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
+
+  // Safety check: never silently replace a list with an empty or much shorter one
+  const current = Math.max(sheet.getLastRow() - 1, 0);
+  if (current > 0 && vendors.length < current) {
+    const ui = SpreadsheetApp.getUi();
+    const msg = vendors.length === 0
+      ? 'The admin app returned NO vendors, but this sheet has ' + current + '.'
+      : 'The admin app has ' + vendors.length + ' vendors, but this sheet has ' + current + ' (' + (current - vendors.length) + ' fewer).';
+    const answer = ui.alert(
+      'Check before replacing',
+      msg + '\n\nIf vendors were deleted in the app on purpose, click Yes. ' +
+        'If not, click No — this sheet stays as it is.\n\n' +
+        'The current list is also copied to "' + BACKUP_NAME + '" before any change.',
+      ui.ButtonSet.YES_NO,
+    );
+    if (answer !== ui.Button.YES) {
+      ss.toast('Sync cancelled — the sheet was not changed', 'Insoft', 6);
+      return;
+    }
+  }
+
+  // Keep the previous list in its own tab
+  if (current > 0) {
+    const old = ss.getSheetByName(BACKUP_NAME);
+    if (old) ss.deleteSheet(old);
+    sheet.copyTo(ss).setName(BACKUP_NAME);
+    ss.setActiveSheet(sheet);
+  }
   const rows = vendors.map((v) => [
     v.company || '',
     v.owner_mobile || '',
@@ -97,10 +129,9 @@ function syncVendors() {
   ss.toast(rows.length + ' vendors synced', 'Insoft', 5);
 }
 
-function installHourlySync() {
-  ScriptApp.getProjectTriggers()
-    .filter((t) => t.getHandlerFunction() === 'syncVendors')
-    .forEach((t) => ScriptApp.deleteTrigger(t));
-  ScriptApp.newTrigger('syncVendors').timeBased().everyHours(1).create();
-  syncVendors();
+// Removes the hourly trigger used by the earlier version of this script.
+function removeHourlySync() {
+  const triggers = ScriptApp.getProjectTriggers().filter((t) => t.getHandlerFunction() === 'syncVendors');
+  triggers.forEach((t) => ScriptApp.deleteTrigger(t));
+  SpreadsheetApp.getActive().toast(triggers.length + ' automatic sync trigger(s) removed. Sync now runs only from the Insoft menu.', 'Insoft', 6);
 }
