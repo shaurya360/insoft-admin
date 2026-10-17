@@ -2,14 +2,14 @@
 // The generator's own functions (addItem, calculateGST, generatePreview,
 // togglePaymentDays, downloadPDF) are reused as-is; this module only adds
 // authentication, shared client/vendor selection and saving to Supabase.
-import { sb, requireAdmin, logout } from '../supabase.js';
+import { sb, requireUser, isAdmin, logout } from '../supabase.js';
 import {
   ICONS, esc, inr, fmtDate, todayISO, openModal, confirmDialog, createCombobox, toast, errorMessage,
   loadingBlock, emptyState, setLoading, debounce,
 } from '../ui.js';
 import { fetchClients, fetchVendors, openClientForm, openVendorForm } from '../entities.js';
 
-await requireAdmin();
+await requireUser();
 let clients = [];
 let vendors = [];
 let partiesLoading = true;
@@ -309,7 +309,7 @@ async function openSavedList() {
         <td><div class="row-actions">
           <a class="btn btn-sm" href="quotation.html?id=${r.id}">Open</a>
           <a class="btn btn-sm btn-ghost" href="quotation.html?copy=${r.id}" title="Start a new document from this one">Duplicate</a>
-          <button type="button" class="icon-btn" data-del title="Delete" aria-label="Delete">${ICONS.trash}</button>
+          ${isAdmin() ? `<button type="button" class="icon-btn" data-del title="Delete" aria-label="Delete">${ICONS.trash}</button>` : ''}
         </div></td>
       </tr>`).join('') : '<tr><td colspan="5" class="muted">No matches</td></tr>';
   };

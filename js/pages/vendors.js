@@ -1,5 +1,5 @@
 import { initShell } from '../layout.js';
-import { sb } from '../supabase.js';
+import { sb, isAdmin } from '../supabase.js';
 import {
   ICONS, esc, inr, fmtDate, statusBadge, $, openModal, confirmDialog, createCombobox, toast, errorMessage,
   loadingBlock, emptyState, debounce, telHref, waHref, phoneActions, copyText, h,
@@ -142,7 +142,7 @@ function vendorCard(v, q) {
     <article class="card vendor-card" data-id="${v.id}" tabindex="0" aria-label="${esc(v.name)}">
       <div class="vendor-card-head">
         <h3>${esc(v.name)}</h3>
-        ${Number(v.outstanding) > 0 ? `<span class="owed">Owed <b>${inr(v.outstanding)}</b></span>` : ''}
+        ${isAdmin() && Number(v.outstanding) > 0 ? `<span class="owed">Owed <b>${inr(v.outstanding)}</b></span>` : ''}
       </div>
       ${v.address ? `<div class="vendor-meta"><span>${ICONS.pin}${esc(v.address)}</span></div>` : ''}
       ${contactLines(v)}
@@ -186,10 +186,14 @@ async function editVendor(id) {
 
 async function openDetails(id) {
   const m = openModal({ title: 'Vendor details', body: loadingBlock(), wide: true });
+  const admin = isAdmin();
   const [v, p] = await Promise.all([
     sb.from('vendor_directory').select('*').eq('id', id).maybeSingle(),
-    sb.from('payables_view').select('id, description, total_amount, amount_paid, balance, status, transaction_date')
-      .eq('vendor_id', id).order('transaction_date', { ascending: false }).limit(10),
+    // finance: admins only
+    admin
+      ? sb.from('payables_view').select('id, description, total_amount, amount_paid, balance, status, transaction_date')
+        .eq('vendor_id', id).order('transaction_date', { ascending: false }).limit(10)
+      : { data: [], error: null },
   ]);
   if (v.error || p.error || !v.data) {
     m.body.innerHTML = `<div class="alert alert-error">${esc(v.error || p.error ? errorMessage(v.error || p.error) : 'Vendor not found.')}</div>`;
@@ -204,14 +208,14 @@ async function openDetails(id) {
       <dt>Contact person</dt><dd>${esc(vendor.poc_name || '') || '<span class="muted">—</span>'}</dd>
       <dt>Contact number</dt><dd>${vendor.poc_phone ? `${esc(vendor.poc_phone)} ${phoneActions(vendor.poc_phone, { label: vendor.poc_name || 'contact' })}` : '<span class="muted">—</span>'}</dd>
       <dt>Address</dt><dd style="white-space:pre-wrap">${esc(vendor.address || '') || '<span class="muted">—</span>'}</dd>
-      <dt>Outstanding</dt><dd>${Number(vendor.outstanding) > 0 ? `<b style="color:var(--danger)">${inr(vendor.outstanding)}</b> still to pay` : '<span class="muted">Nothing owed</span>'}</dd>
+      ${admin ? `<dt>Outstanding</dt><dd>${Number(vendor.outstanding) > 0 ? `<b style="color:var(--danger)">${inr(vendor.outstanding)}</b> still to pay` : '<span class="muted">Nothing owed</span>'}</dd>` : ''}
       <dt>Added</dt><dd>${fmtDate(vendor.created_at)}</dd>
     </dl>
     <div class="form-section">
       <div class="form-section-head"><h4>Product categories &amp; brands</h4></div>
       ${offeringsHtml(vendor.offerings, '')}
     </div>
-    <div class="form-section">
+    ${admin ? `<div class="form-section">
       <div class="form-section-head"><h4>Recent payables</h4><a href="money.html#payables" class="small">Open Money Manager →</a></div>
       ${p.data.length ? `<div class="table-wrap"><table class="table"><tbody>${p.data.map((r) => `
         <tr class="clickable" data-href="money.html#payables/${r.id}">
@@ -219,7 +223,7 @@ async function openDetails(id) {
           <td>${statusBadge(r.status)}</td>
           <td class="num">${inr(r.balance)}<div class="cell-sub">of ${inr(r.total_amount)}</div></td>
         </tr>`).join('')}</tbody></table></div>` : '<div class="muted small">No payables recorded for this vendor.</div>'}
-    </div>`;
+    </div>` : ''}`;
   m.body.addEventListener('click', (e) => {
     const copy = e.target.closest('[data-copy]');
     if (copy) copyText(copy.dataset.copy);
@@ -227,7 +231,7 @@ async function openDetails(id) {
     if (tr) location.href = tr.dataset.href;
   });
   const foot = h(`<div class="modal-foot">
-      <button type="button" class="btn btn-ghost" data-del style="color:var(--danger)">${ICONS.trash} Delete</button>
+      ${admin ? `<button type="button" class="btn btn-ghost" data-del style="color:var(--danger)">${ICONS.trash} Delete</button>` : ''}
       <span class="spacer"></span>
       ${mainContactButtons(vendor).replace(/ btn-sm/g, '')}
       <button type="button" class="btn btn-primary" data-edit>${ICONS.edit} Edit vendor</button>
@@ -237,7 +241,7 @@ async function openDetails(id) {
     m.close();
     await editVendor(id);
   });
-  foot.querySelector('[data-del]').addEventListener('click', async () => {
+  foot.querySelector('[data-del]')?.addEventListener('click', async () => {
     if (p.data.length) {
       toast(`${vendor.name} has payable records and cannot be deleted.`, 'error');
       return;

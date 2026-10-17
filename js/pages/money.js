@@ -7,7 +7,7 @@ import {
 } from '../ui.js';
 import { fetchAll, fetchVendors, fetchClients, openVendorForm, openClientForm } from '../entities.js';
 
-await initShell('money');
+await initShell('money', { adminOnly: true });
 
 const KINDS = {
   payables: {

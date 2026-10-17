@@ -1,8 +1,17 @@
 import { initShell } from '../layout.js';
-import { sb } from '../supabase.js';
+import { sb, isAdmin } from '../supabase.js';
 import { ICONS, inr, esc, fmtDate, todayISO, loadingBlock, emptyState, errorMessage, toast } from '../ui.js';
 
 await initShell('dashboard');
+
+if (new URLSearchParams(location.search).get('restricted')) {
+  document.getElementById('restricted').hidden = false;
+  history.replaceState(null, '', 'dashboard.html');
+}
+if (!isAdmin()) {
+  document.querySelector('.feature-grid').classList.add('cols-2');
+  document.querySelector('.stats').classList.add('cols-3');
+}
 
 document.querySelectorAll('[data-icon]').forEach((el) => { el.innerHTML = ICONS[el.dataset.icon]; });
 const hour = new Date().getHours();
@@ -36,21 +45,30 @@ document.addEventListener('click', (e) => {
 });
 
 try {
-  const [stats, pay, rec] = await Promise.all([
-    sb.rpc('dashboard_stats'),
-    sb.from('payables_view').select('id, party_name, description, due_date, balance').gt('balance', 0)
-      .order('due_date', { ascending: true, nullsFirst: false }).limit(6),
-    sb.from('receivables_view').select('id, party_name, description, due_date, balance').gt('balance', 0)
-      .order('due_date', { ascending: true, nullsFirst: false }).limit(6),
-  ]);
-  for (const r of [stats, pay, rec]) if (r.error) throw r.error;
-  const s = stats.data;
-  document.querySelector('[data-stat="vendors"]').textContent = Number(s.vendors).toLocaleString('en-IN');
-  document.querySelector('[data-stat="clients"]').textContent = Number(s.clients).toLocaleString('en-IN');
-  document.querySelector('[data-stat="payable_outstanding"]').textContent = inr(s.payable_outstanding);
-  document.querySelector('[data-stat="receivable_outstanding"]').textContent = inr(s.receivable_outstanding);
-  duePay.innerHTML = dueList(pay.data, 'payables');
-  dueRec.innerHTML = dueList(rec.data, 'receivables');
+  if (!isAdmin()) {
+    // Employees: no finance data is requested at all.
+    const { data: s, error } = await sb.rpc('dashboard_stats');
+    if (error) throw error;
+    for (const k of ['vendors', 'clients', 'quotations']) {
+      document.querySelector(`[data-stat="${k}"]`).textContent = Number(s[k]).toLocaleString('en-IN');
+    }
+  } else {
+    const [stats, pay, rec] = await Promise.all([
+      sb.rpc('dashboard_stats'),
+      sb.from('payables_view').select('id, party_name, description, due_date, balance').gt('balance', 0)
+        .order('due_date', { ascending: true, nullsFirst: false }).limit(6),
+      sb.from('receivables_view').select('id, party_name, description, due_date, balance').gt('balance', 0)
+        .order('due_date', { ascending: true, nullsFirst: false }).limit(6),
+    ]);
+    for (const r of [stats, pay, rec]) if (r.error) throw r.error;
+    const s = stats.data;
+    document.querySelector('[data-stat="vendors"]').textContent = Number(s.vendors).toLocaleString('en-IN');
+    document.querySelector('[data-stat="clients"]').textContent = Number(s.clients).toLocaleString('en-IN');
+    document.querySelector('[data-stat="payable_outstanding"]').textContent = inr(s.payable_outstanding);
+    document.querySelector('[data-stat="receivable_outstanding"]').textContent = inr(s.receivable_outstanding);
+    duePay.innerHTML = dueList(pay.data, 'payables');
+    dueRec.innerHTML = dueList(rec.data, 'receivables');
+  }
 } catch (e) {
   toast(errorMessage(e), 'error');
   duePay.innerHTML = dueRec.innerHTML = `<div class="card-pad"><div class="alert alert-error">${esc(errorMessage(e))}</div></div>`;

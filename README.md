@@ -34,7 +34,7 @@ insoft-admin-app/
 │   └── pages/  login · dashboard · money · vendors · quotation
 ├── supabase/
 │   ├── migrations/001_admin_schema.sql   ← schema, triggers, views, functions, RLS
-│   ├── setup_admin.sql                   ← grants admin rights to your user
+│   ├── setup_admin.sql                   ← add a user / set their role (admin or employee)
 │   └── optional/import_legacy_data.sql   ← import rows from the old attempt (optional)
 ├── scripts/  build-config.mjs · dev-server.mjs
 ├── .env.example
@@ -47,7 +47,7 @@ insoft-admin-app/
 
 ### 2.1 Database (already applied to project `zllvrsgkywsembcxfpnd`)
 
-`supabase/migrations/001_admin_schema.sql` and `002_vendor_poc.sql` have **already been run** on your project. For a new project, open **SQL Editor → New query** and run each file once, in order.
+`supabase/migrations/001_admin_schema.sql`, `002_vendor_poc.sql` and `003_roles.sql` have **already been run** on your project. For a new project, open **SQL Editor → New query** and run each file once, in order.
 
 What it did to the earlier attempt's tables (`vendors`, `clients`, `money_records`):
 
@@ -66,9 +66,27 @@ What it did to the earlier attempt's tables (`vendors`, `clients`, `money_record
    - Tick **Auto Confirm User**.
 2. Turn off public signups: **Authentication → Sign In / Providers → "Allow new users to sign up" → off**.
    - This is extra protection. Even if signups stayed on, a new account could not see or change any data, because every policy checks `app_admins`.
-3. Open `supabase/setup_admin.sql`, replace `admin@example.com` with your email, and run it in the SQL Editor. It should return one row.
+3. Open `supabase/setup_admin.sql`, set your email and the role `'admin'`, and run it in the SQL Editor.
 
 To change the password later, use the dashboard (**Users → … → Send password recovery**), or update it there directly.
+
+### 2.2a Users and roles
+
+Two roles are enforced in the database (`supabase/migrations/003_roles.sql`):
+
+| | Admin | Employee |
+|---|---|---|
+| Quotation Generator | ✓ | ✓ |
+| Vendor Directory (search, add, edit) | ✓ | ✓, with no owed amounts or payables |
+| Clients (add, edit) | ✓ | ✓, via the quotation page |
+| Money Manager, payables, receivables, payments, finance totals, dues | ✓ | ✗ |
+| Delete vendors, clients, saved quotations | ✓ | ✗ |
+
+**To add a user:**
+1. Create their login under **Authentication → Users → Add user**, ticking *Auto Confirm User*.
+2. Run `supabase/setup_admin.sql` with their email and either `'admin'` or `'employee'`.
+   - Running it again for the same email changes their role.
+   - Deleting the login removes their access.
 
 ### 2.3 Configure the app
 

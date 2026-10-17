@@ -15,15 +15,15 @@ function showError(text) {
 // Already signed in as admin → straight to the app.
 const { data } = await sb.auth.getSession();
 if (data.session) {
-  const { data: isAdmin } = await sb.rpc('is_admin');
-  if (isAdmin) {
+  const { data: role } = await sb.rpc('my_role');
+  if (role) {
     location.replace(next);
   } else {
     await sb.auth.signOut();
   }
 }
 document.documentElement.classList.remove('auth-pending');
-if (params.get('denied')) showError('This account is not authorized to use the admin dashboard.');
+if (params.get('denied')) showError('This account has not been given access to this app.');
 
 document.getElementById('pw-toggle').addEventListener('click', (e) => {
   const pw = form.password;
@@ -47,11 +47,11 @@ form.addEventListener('submit', async (e) => {
       showError(/invalid/i.test(error.message) ? 'Incorrect email or password.' : errorMessage(error));
       return;
     }
-    const { data: isAdmin, error: adminErr } = await sb.rpc('is_admin');
-    if (adminErr) throw adminErr;
-    if (!isAdmin) {
+    const { data: role, error: roleErr } = await sb.rpc('my_role');
+    if (roleErr) throw roleErr;
+    if (!role) {
       await sb.auth.signOut();
-      showError('This account is not authorized to use the admin dashboard.');
+      showError('This account has not been given access to this app.');
       return;
     }
     location.replace(next);

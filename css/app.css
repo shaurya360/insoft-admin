@@ -396,3 +396,12 @@ dialog.modal::backdrop { background: rgba(16, 24, 40, .45); }
 .pw-toggle { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); border: 0; background: transparent; color: var(--muted); font: 600 12.5px var(--font); cursor: pointer; padding: 6px 8px; border-radius: 5px; }
 .pw-toggle:hover { color: var(--text); background: var(--surface-2); }
 .fatal { max-width: 520px; margin: 80px auto; padding: 24px; }
+
+/* Roles */
+.role-badge { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--primary); margin-top: 1px; }
+html[data-role="employee"] .admin-only,
+html[data-role="admin"] .employee-only { display: none !important; }
+.feature-grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 900px) { .feature-grid.cols-2 { grid-template-columns: 1fr; } }
+.stats.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 700px) { .stats.cols-3 { grid-template-columns: 1fr; } }

@@ -1,11 +1,11 @@
 // App shell: sidebar navigation (desktop) / drawer + top bar (mobile).
-import { requireAdmin, currentUser, logout } from './supabase.js';
+import { requireUser, currentUser, currentRole, isAdmin, logout } from './supabase.js';
 import { ICONS, esc, $ } from './ui.js';
 
 const NAV = [
   { href: 'dashboard.html', key: 'dashboard', label: 'Dashboard', icon: 'home' },
   { href: 'quotation.html', key: 'quotation', label: 'Quotation Generator', icon: 'file' },
-  { href: 'money.html', key: 'money', label: 'Money Manager', icon: 'wallet', children: [
+  { href: 'money.html', key: 'money', label: 'Money Manager', icon: 'wallet', adminOnly: true, children: [
     { href: 'money.html#payables', key: 'payables', label: 'Vendor Payables' },
     { href: 'money.html#receivables', key: 'receivables', label: 'Client Receivables' },
     { href: 'money.html#clients', key: 'clients', label: 'Clients' },
@@ -15,14 +15,14 @@ const NAV = [
 
 /**
  * Builds the shell around the page's <main id="page"> content.
- * Resolves after authentication succeeds.
+ * Resolves after authentication succeeds. { adminOnly } pages send employees to the dashboard.
  */
-export async function initShell(activeKey) {
-  await requireAdmin();
+export async function initShell(activeKey, { adminOnly = false } = {}) {
+  await requireUser({ adminOnly });
   const page = $('#page');
   const user = currentUser();
 
-  const navHtml = NAV.map((item) => `
+  const navHtml = NAV.filter((item) => !item.adminOnly || isAdmin()).map((item) => `
     <a href="${item.href}" class="${item.key === activeKey ? 'active' : ''}" data-key="${item.key}">${ICONS[item.icon]}<span>${item.label}</span></a>
     ${item.key === activeKey && item.children ? item.children.map((c) => `<a href="${c.href}" class="sub" data-sub="${c.key}">${c.label}</a>`).join('') : ''}
   `).join('');
@@ -37,7 +37,7 @@ export async function initShell(activeKey) {
       </div>
       <nav class="nav">${navHtml}</nav>
       <div class="sidebar-foot">
-        <div class="user-email" title="${esc(user?.email)}">${esc(user?.email)}</div>
+        <div class="user-email" title="${esc(user?.email)}">${esc(user?.email)}<span class="role-badge">${currentRole() === 'admin' ? 'Admin' : 'Employee'}</span></div>
         <button type="button" class="btn btn-block" data-logout>${ICONS.logout} Log out</button>
       </div>
     </aside>

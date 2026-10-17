@@ -37,19 +37,21 @@ function currentPage() {
 }
 
 let session = null;
+let role = null;
 
 /**
- * Ensures a signed-in administrator. Redirects to the login page otherwise.
- * Resolves with the session; reveals the page.
+ * Ensures a signed-in user with a role (admin or employee). Redirects to the
+ * login page otherwise. With { adminOnly: true }, employees are sent to the
+ * dashboard. Resolves with the session; reveals the page.
  */
-export async function requireAdmin() {
+export async function requireUser({ adminOnly = false } = {}) {
   const { data } = await sb.auth.getSession();
   session = data.session;
   if (!session) {
     location.replace('login.html?next=' + encodeURIComponent(currentPage()));
     return new Promise(() => {});
   }
-  const { data: isAdmin, error } = await sb.rpc('is_admin');
+  const { data: myRole, error } = await sb.rpc('my_role');
   if (error) {
     // Expired / revoked refresh token → back to login. Anything else: show it.
     if (error.code === 'PGRST301' || /JWT|token/i.test(error.message)) {
@@ -59,17 +61,27 @@ export async function requireAdmin() {
     }
     fatal('Could not verify your access: ' + error.message + '. Check your connection and reload.');
   }
-  if (!isAdmin) {
+  if (!myRole) {
     await sb.auth.signOut();
     location.replace('login.html?denied=1');
+    return new Promise(() => {});
+  }
+  role = myRole;
+  if (adminOnly && role !== 'admin') {
+    location.replace('dashboard.html?restricted=1');
     return new Promise(() => {});
   }
   sb.auth.onAuthStateChange((event, s) => {
     if (event === 'SIGNED_OUT' || !s) location.replace('login.html');
   });
   document.documentElement.classList.remove('auth-pending');
+  document.documentElement.dataset.role = role;
   return session;
 }
+
+/** 'admin' | 'employee' (after requireUser). */
+export const currentRole = () => role;
+export const isAdmin = () => role === 'admin';
 
 export function currentUser() {
   return session?.user ?? null;

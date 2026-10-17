@@ -17,6 +17,7 @@
 </head>
 <body>
   <main id="page">
+    <div class="alert alert-warning" id="restricted" hidden style="margin-bottom:16px">That page is only available to admins.</div>
     <div class="page-head">
       <div>
         <h1>Dashboard</h1>
@@ -31,7 +32,7 @@
         <p>Create quotations and purchase orders, print or download as PDF.</p>
         <span class="go">Open →</span>
       </a>
-      <a class="card feature" href="money.html">
+      <a class="card feature admin-only" href="money.html">
         <div class="feature-icon" data-icon="wallet"></div>
         <h2>Money Manager</h2>
         <p>Track what you owe vendors and what clients owe you, with payment history.</p>
@@ -48,11 +49,12 @@
     <div class="stats" id="stats" aria-live="polite">
       <div class="card stat"><div class="stat-label">Vendors</div><div class="stat-value" data-stat="vendors">—</div><div class="stat-note">In the shared directory</div></div>
       <div class="card stat"><div class="stat-label">Clients</div><div class="stat-value" data-stat="clients">—</div><div class="stat-note">In the shared directory</div></div>
-      <div class="card stat accent-out"><div class="stat-label">Outstanding payable</div><div class="stat-value" data-stat="payable_outstanding">—</div><div class="stat-note">Remaining balance owed to vendors</div></div>
-      <div class="card stat accent-in"><div class="stat-label">Outstanding receivable</div><div class="stat-value" data-stat="receivable_outstanding">—</div><div class="stat-note">Remaining balance owed by clients</div></div>
+      <div class="card stat employee-only"><div class="stat-label">Saved quotations</div><div class="stat-value" data-stat="quotations">—</div><div class="stat-note">Quotations &amp; purchase orders</div></div>
+      <div class="card stat accent-out admin-only"><div class="stat-label">Outstanding payable</div><div class="stat-value" data-stat="payable_outstanding">—</div><div class="stat-note">Remaining balance owed to vendors</div></div>
+      <div class="card stat accent-in admin-only"><div class="stat-label">Outstanding receivable</div><div class="stat-value" data-stat="receivable_outstanding">—</div><div class="stat-note">Remaining balance owed by clients</div></div>
     </div>
 
-    <div class="two-col">
+    <div class="two-col admin-only">
       <section class="card">
         <div class="card-pad" style="padding-bottom:8px"><h2 class="section-title" style="margin:0">Upcoming payments to vendors</h2></div>
         <div id="due-payables"></div>
