@@ -292,25 +292,46 @@
         <!-- Terms & Conditions Customization -->
         <h3>Terms & Conditions</h3>
         <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+            <!-- Delivery Terms -->
             <div class="input-group">
+                <label>Delivery Terms</label>
+                <select id="tc-delivery-type" onchange="toggleDeliveryFields(); generatePreview()">
+                    <option value="Days from PO" selected>Days from PO</option>
+                    <option value="Custom">Custom Message</option>
+                </select>
+            </div>
+            <div class="input-group" id="tc-delivery-days-group">
                 <label>Delivery Time (Days)</label>
                 <input type="number" id="tc-delivery" value="1" min="0" oninput="generatePreview()">
             </div>
+            <div class="input-group large" id="tc-delivery-custom-group" style="display: none;">
+                <label>Custom Delivery Terms</label>
+                <input type="text" id="tc-delivery-custom" placeholder="e.g. Immediate / Ex-Stock / 2-3 Weeks" oninput="generatePreview()">
+            </div>
+
+            <!-- Quotation Validity -->
             <div class="input-group">
                 <label>Quotation Validity (Days)</label>
                 <input type="number" id="tc-validity" value="7" min="0" oninput="generatePreview()">
             </div>
-            <div class="input-group large">
+
+            <!-- Payment Terms -->
+            <div class="input-group">
                 <label>Payment Terms</label>
-                <select id="tc-payment-type" onchange="togglePaymentDays(); generatePreview()">
+                <select id="tc-payment-type" onchange="togglePaymentFields(); generatePreview()">
                     <option value="Advanced payment">Advanced payment</option>
                     <option value="On Delivery" selected>On Delivery</option>
                     <option value="Days from delivery">Days from delivery</option>
+                    <option value="Custom">Custom Message</option>
                 </select>
             </div>
             <div class="input-group" id="tc-payment-days-group" style="display: none;">
                 <label>Days from Delivery</label>
                 <input type="number" id="tc-payment-days" value="15" min="1" oninput="generatePreview()">
+            </div>
+            <div class="input-group large" id="tc-payment-custom-group" style="display: none;">
+                <label>Custom Payment Terms</label>
+                <input type="text" id="tc-payment-custom" placeholder="e.g. 50% Advance, 50% on Delivery" oninput="generatePreview()">
             </div>
         </div>
 
@@ -391,7 +412,7 @@
             <div class="terms">
                 <h3>Terms & Conditions</h3>
                 <p>1. GST: Inclusive (18%)</p>
-                <p>2. Delivery Time: <span id="out-tc-delivery">1</span> day(s) from the date of Purchase Order</p>
+                <p>2. Delivery Time: <span id="out-tc-delivery">1 day(s) from the date of Purchase Order</span></p>
                 <p>3. Payment Terms: <span id="out-tc-payment">On Delivery</span></p>
                 <p>4. Quotation Validity: <span id="out-tc-validity">7</span> Days from the date of issue</p>
             </div>
@@ -422,17 +443,37 @@
             document.getElementById('refNo').value = `INS/${today.getFullYear()}/${paddedSerial}`;
 
             addItem();
-            togglePaymentDays();
+            toggleDeliveryFields();
+            togglePaymentFields();
             generatePreview();
         };
 
-        function togglePaymentDays() {
+        function toggleDeliveryFields() {
+            const type = document.getElementById('tc-delivery-type').value;
+            const daysGroup = document.getElementById('tc-delivery-days-group');
+            const customGroup = document.getElementById('tc-delivery-custom-group');
+
+            if (type === 'Custom') {
+                daysGroup.style.display = 'none';
+                customGroup.style.display = 'flex';
+            } else {
+                daysGroup.style.display = 'flex';
+                customGroup.style.display = 'none';
+            }
+        }
+
+        function togglePaymentFields() {
             const type = document.getElementById('tc-payment-type').value;
             const daysGroup = document.getElementById('tc-payment-days-group');
+            const customGroup = document.getElementById('tc-payment-custom-group');
+
+            daysGroup.style.display = 'none';
+            customGroup.style.display = 'none';
+
             if (type === 'Days from delivery') {
                 daysGroup.style.display = 'flex';
-            } else {
-                daysGroup.style.display = 'none';
+            } else if (type === 'Custom') {
+                customGroup.style.display = 'flex';
             }
         }
 
@@ -548,16 +589,27 @@
             document.getElementById('out-date').innerText = formatDate(docDateValue);
             document.getElementById('out-valid').innerText = validDateFormatted;
 
-            const deliveryDays = document.getElementById('tc-delivery').value || 1;
-            const paymentType = document.getElementById('tc-payment-type').value;
+            // Delivery Terms Logic
+            const deliveryType = document.getElementById('tc-delivery-type').value;
+            let deliveryText = "";
+            if (deliveryType === 'Custom') {
+                deliveryText = document.getElementById('tc-delivery-custom').value.trim() || "As mutually agreed";
+            } else {
+                const deliveryDays = document.getElementById('tc-delivery').value || 1;
+                deliveryText = `${deliveryDays} day(s) from the date of Purchase Order`;
+            }
 
+            // Payment Terms Logic
+            const paymentType = document.getElementById('tc-payment-type').value;
             let paymentText = paymentType;
             if (paymentType === 'Days from delivery') {
                 const payDays = document.getElementById('tc-payment-days').value || 15;
                 paymentText = `${payDays} Days from delivery`;
+            } else if (paymentType === 'Custom') {
+                paymentText = document.getElementById('tc-payment-custom').value.trim() || "As mutually agreed";
             }
 
-            document.getElementById('out-tc-delivery').innerText = deliveryDays;
+            document.getElementById('out-tc-delivery').innerText = deliveryText;
             document.getElementById('out-tc-payment').innerText = paymentText;
             document.getElementById('out-tc-validity').innerText = validityDays;
 
