@@ -160,10 +160,13 @@ function collect() {
     doc_date: $id('docDate').value,
     items,
     terms: {
+      delivery_type: $id('tc-delivery-type').value,
       delivery_days: $id('tc-delivery').value,
+      delivery_custom: $id('tc-delivery-custom').value,
       validity_days: $id('tc-validity').value,
       payment_type: $id('tc-payment-type').value,
       payment_days: $id('tc-payment-days').value,
+      payment_custom: $id('tc-payment-custom').value,
     },
     subtotal: round2(subtotal),
     gst_amount: round2(gst),
@@ -172,6 +175,7 @@ function collect() {
 }
 
 function fill(q, { asCopy = false, ref = null } = {}) {
+  window.__qaLoaded = true;
   $id('docType').value = q.doc_type;
   $id('clientName').value = q.party_name || '';
   $id('clientAddress').value = q.party_address || '';
@@ -189,11 +193,16 @@ function fill(q, { asCopy = false, ref = null } = {}) {
     row.querySelector('.item-incgst').value = it.inc_gst ?? '';
   }
   const t = q.terms || {};
+  $id('tc-delivery-type').value = t.delivery_type || 'Days from PO';
   if (t.delivery_days != null) $id('tc-delivery').value = t.delivery_days;
+  $id('tc-delivery-custom').value = t.delivery_custom || '';
   if (t.validity_days != null) $id('tc-validity').value = t.validity_days;
   if (t.payment_type) $id('tc-payment-type').value = t.payment_type;
   if (t.payment_days != null) $id('tc-payment-days').value = t.payment_days;
-  togglePaymentDays();
+  $id('tc-payment-custom').value = t.payment_custom || '';
+  if (typeof toggleDeliveryFields === 'function') toggleDeliveryFields();
+  if (typeof togglePaymentFields === 'function') togglePaymentFields();
+  else if (typeof togglePaymentDays === 'function') togglePaymentDays();
 
   state.partyType = q.client_id ? 'client' : q.vendor_id ? 'vendor' : null;
   state.partyId = q.client_id || q.vendor_id || null;
@@ -201,6 +210,7 @@ function fill(q, { asCopy = false, ref = null } = {}) {
   $id('clientName').value = q.party_name || ''; // keep the printed name, even if the record was renamed since
   renderPartyStatus();
   generatePreview();
+  requestAnimationFrame(() => generatePreview());
 }
 
 /* ---------------- Save ---------------- */
